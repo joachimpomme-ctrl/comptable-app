@@ -1,0 +1,50 @@
+{
+  "name": "comptable-app",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "knowledge:build": "tsx --env-file=.env.local scripts/build-knowledge.ts",
+    "poc": "tsx --env-file=.env.local scripts/poc-claude-corpus.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.0",
+    "@auth/drizzle-adapter": "^1.7.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.36.4",
+    "googleapis": "^144.0.0",
+    "lucide-react": "^0.460.0",
+    "next": "15.1.0",
+    "next-auth": "5.0.0-beta.25",
+    "postgres": "^3.4.5",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "tailwind-merge": "^2.5.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "drizzle-kit": "^0.30.0",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "15.1.0",
+    "tailwindcss": "^4.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
