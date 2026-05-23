@@ -1,65 +1,140 @@
-import Image from "next/image";
+import Link from "next/link";
+
+const AGENTS = [
+  {
+    code: "01",
+    name: "Orchestrateur",
+    model: "Gemini 2.5 Flash",
+    role: "Classifie chaque requête (domaine, criticité, besoin de calcul) en <1 s.",
+    color: "bg-[#0F2A47]",
+  },
+  {
+    code: "02",
+    name: "Gem cloné",
+    model: "Gemini 2.5 Flash + KB cachée",
+    role: "Reproduit le Gem Gemini via API. 10 fichiers KB en explicit cache.",
+    color: "bg-[#D4A574]",
+  },
+  {
+    code: "03",
+    name: "Calculateur",
+    model: "TypeScript pur",
+    role: "FORM-001 (amort 39-C), FORM-002 (PV LMNP 2025). Zéro hallucination.",
+    color: "bg-[#3B82F6]",
+  },
+  {
+    code: "04",
+    name: "Reviewer",
+    model: "Gemini 2.5 Pro",
+    role: "Challenge la réponse du Gem. Verdict + écarts + score de confiance.",
+    color: "bg-[#0F2A47]",
+  },
+  {
+    code: "QG",
+    name: "Quality Gate",
+    model: "TypeScript pur",
+    role: "Vérifie citations CGI, format, millésimes, statuts. Annotations.",
+    color: "bg-[#10B981]",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="border-b border-zinc-200 bg-white">
+        <div className="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
+          <div className="flex items-baseline gap-3">
+            <span className="text-[10px] font-bold tracking-[2px] text-[#D4A574]">
+              COMPTA
+            </span>
+            <h1 className="text-lg font-bold text-[#0F2A47]">
+              Multi-Agents
+            </h1>
+            <span className="text-xs text-zinc-500">v0.1 · MVP LMNP</span>
+          </div>
+          <Link
+            href="/ask"
+            className="text-sm font-medium text-[#0F2A47] hover:text-[#3B82F6]"
+          >
+            Lancer une requête →
+          </Link>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="bg-[#0F2A47] text-white">
+        <div className="max-w-6xl mx-auto px-8 py-20">
+          <div className="text-[10px] font-bold tracking-[2px] text-[#D4A574] mb-3">
+            ÉCOSYSTÈME EN COURS DE CONSTRUCTION
+          </div>
+          <div className="w-12 h-[3px] bg-[#D4A574] mb-6"></div>
+          <h2 className="text-5xl font-bold leading-tight mb-4">
+            Assistant comptable
+            <br />
+            multi-agents
+          </h2>
+          <p className="text-lg text-zinc-300 max-w-2xl">
+            Cinq spécialistes orbitent autour du Gem comptable — orchestrateur,
+            calculateur déterministe, reviewer, quality gate — pour fiabiliser
+            chaque réponse fiscale, patrimoniale ou comptable.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Agents */}
+      <section className="flex-1 bg-zinc-50">
+        <div className="max-w-6xl mx-auto px-8 py-16">
+          <div className="text-[10px] font-bold tracking-[2px] text-zinc-500 mb-2">
+            § ARCHITECTURE
+          </div>
+          <h3 className="text-2xl font-bold text-[#0F2A47] mb-2">
+            Les agents
+          </h3>
+          <p className="text-sm text-zinc-600 mb-10 max-w-2xl">
+            Le Gem actuel (gemini.google.com) reste intouché. Les agents
+            ci-dessous orbitent autour, sans modifier ni dépendre de son
+            comportement interne.
+          </p>
+
+          <div className="grid gap-3">
+            {AGENTS.map((a) => (
+              <div
+                key={a.code}
+                className="bg-white border border-zinc-200 rounded-lg p-5 flex items-center gap-5 hover:shadow-md transition-shadow"
+              >
+                <div
+                  className={`${a.color} text-white w-12 h-12 rounded-full flex items-center justify-center font-mono font-bold text-sm`}
+                >
+                  {a.code}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <span className="font-bold text-[#0F2A47]">{a.name}</span>
+                    <span className="text-xs font-mono text-zinc-500">
+                      {a.model}
+                    </span>
+                  </div>
+                  <p className="text-sm text-zinc-600">{a.role}</p>
+                </div>
+                <div className="text-xs font-bold text-zinc-400">
+                  ○ pending
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
+      </section>
+
+      <footer className="bg-[#0A1C2F] text-zinc-400 py-6">
+        <div className="max-w-6xl mx-auto px-8 text-xs flex justify-between items-center">
+          <span>
+            <span className="text-[#D4A574] font-bold">COMPTA MULTI-AGENTS</span>{" "}
+            · Mai 2026
+          </span>
+          <span className="font-mono">Next.js 16 · Gemini · Vercel</span>
+        </div>
+      </footer>
     </div>
   );
 }

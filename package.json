@@ -4,13 +4,24 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/sync-kb.mjs",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "sync-kb": "node scripts/sync-kb.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:lmnp": "tsx tests/runner-lmnp.ts"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.79",
+    "@google/genai": "^2.6.0",
+    "ai": "^6.0.191",
+    "google-auth-library": "^10.6.2",
+    "googleapis": "^172.0.0",
     "next": "16.2.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -18,6 +29,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.22.3",
+    "typescript": "^5",
+    "vitest": "^4.1.7"
   }
 }

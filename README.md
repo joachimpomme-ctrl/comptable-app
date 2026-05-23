@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Compta Multi-Agents
 
-## Getting Started
+Écosystème de spécialistes orbitant autour du Gem comptable existant — Orchestrateur, Gem cloné, Calculateur, Reviewer, Quality Gate.
 
-First, run the development server:
+Voir `../../Projet_Compta_Multi_Agents.html` à la racine du projet pour la documentation complète.
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
+# Renseigner GEMINI_API_KEY (https://aistudio.google.com/apikey)
+# Optionnel : SHEETS_ID + SHEETS_SERVICE_ACCOUNT_B64 pour la persistance
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Commande | Effet |
+|---|---|
+| `npm run dev` | Lance le serveur de dev (Turbopack) sur http://localhost:3000 |
+| `npm run build` | Build production |
+| `npm test` | Tests unitaires (vitest) — calculateur + quality gate |
+| `npm run test:lmnp` | Test runner LMNP (12 cas, baseline vs écosystème) — **requiert le dev server lancé** |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Routes
 
-## Learn More
+| Route | Description |
+|---|---|
+| `/` | Landing page — présentation de l'écosystème |
+| `/ask` | UI interactive — input question + trace latérale streaming |
+| `POST /api/gem` | Endpoint baseline : Gem cloné seul (KB cachée), sans orchestration |
+| `POST /api/ask` | Pipeline complet — Orchestrateur → Gem → Calculateur → Reviewer → Quality Gate. Stream NDJSON. |
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture du code
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/
+  api/ask/route.ts          # Pipeline complet (NDJSON stream)
+  api/gem/route.ts          # Gem cloné seul (baseline)
+  ask/page.tsx              # Page UI (server component)
+  ask/ask-client.tsx        # Composant client interactif
+  page.tsx                  # Landing page
+  layout.tsx                # Root layout
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+lib/
+  agents/
+    orchestrator.ts         # Gemini Flash + JSON mode
+    gem-clone.ts            # Gemini Flash + KB cachée
+    param-extractor.ts      # Extrait Form002Params depuis question libre
+    reviewer.ts             # Gemini Pro audit
+    calculator/
+      form-001.ts           # Amort art. 39-C
+      form-002.ts           # PV LMNP 2025
+      abattements.ts        # Abat. durée IR/PS + taxe sup.
+  kb/
+    loader.ts               # Charge les 10 fichiers KB
+    cache-manager.ts        # Gestion du context cache Gemini
+    indexes.ts              # Lookup CGI / crosswalk pour Quality Gate
+  sheets/
+    logger.ts               # Persistance Google Sheets
+  quality-gate.ts           # Vérifications déterministes
+  pipeline.ts               # Orchestration des agents
+  gemini-client.ts          # Singleton @google/genai
+  env.ts                    # Accès lazy aux env vars
+  types.ts                  # Types partagés
 
-## Deploy on Vercel
+tests/
+  calculator.test.ts        # Tests unitaires des formules (vitest)
+  quality-gate.test.ts      # Tests unitaires du QG
+  lmnp-cases.json           # 12 cas LMNP de test
+  runner-lmnp.ts            # Runner baseline vs écosystème
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Configuration Sheets (optionnel)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Créer un Google Sheets vide.
+2. Onglet `Historique_Compta` (sera créé/peuplé automatiquement).
+3. Créer un service account sur Google Cloud Console (rôle « Sheets API »).
+4. Partager le Sheets avec l'email du service account (en éditeur).
+5. Encoder le JSON du service account en base64 :
+   ```bash
+   base64 < service-account.json | tr -d '\n' | pbcopy
+   ```
+6. Coller dans `.env.local` :
+   ```
+   SHEETS_ID=<id_dans_url_du_sheets>
+   SHEETS_SERVICE_ACCOUNT_B64=<base64>
+   ```
+
+Sans Sheets configuré, le logger écrit en console (pas de crash).
+
+## Métriques cibles du MVP
+
+| Métrique | Cible vs baseline (Gem seul) |
+|---|---|
+| Citations CGI valides | +5 pts |
+| Erreurs arithmétiques | ÷ 5 |
+| Omission de millésime | ÷ 3 |
+| Latence p50 (simples) | < 1.5× |
+| Latence p50 (complexes) | < 3× |
+| Coût €/requête | < 2.5× |
+
+Mesurées par `npm run test:lmnp` sur les 12 cas de `tests/lmnp-cases.json`.

@@ -1,0 +1,152 @@
+{
+  "version": "1.0",
+  "description": "12 LMNP test cases for baseline (Gem-only) vs ecosystem (full pipeline) comparison.",
+  "source": "Extracted and adapted from PARTAGE/knowledge/08_evaluation_suite.md",
+  "cases": [
+    {
+      "id": "lmnp-001",
+      "level": "simple",
+      "question": "Quel est le seuil micro-BIC pour la location meublée non classée en 2025 ?",
+      "expected_citations": ["CGI Art. 50-0"],
+      "expected_contains": ["77 700", "15 000", "30 %", "abattement"],
+      "expected_millesime": "2025",
+      "expected_calc": null,
+      "domaine": "LMNP",
+      "criticite": "FAIBLE"
+    },
+    {
+      "id": "lmnp-002",
+      "level": "simple",
+      "question": "Différence entre LMNP et LMP en 2025 ?",
+      "expected_citations": ["CGI Art. 155 IV"],
+      "expected_contains": ["23 000", "50 %", "professionnel"],
+      "expected_millesime": "2025",
+      "expected_calc": null,
+      "domaine": "LMNP",
+      "criticite": "MOYENNE"
+    },
+    {
+      "id": "lmnp-003",
+      "level": "standard",
+      "question": "Pour un appartement LMNP au réel acquis 200 000 €, loyers annuels 12 000 €, charges hors amort 6 000 €, amortissements comptabilisés 8 000 €. Quel amortissement déductible ?",
+      "expected_citations": ["CGI Art. 39 C", "FORM-001"],
+      "expected_contains": ["6 000", "déductible", "ARD", "2 000"],
+      "expected_millesime": "2025",
+      "expected_calc": {
+        "formule": "FORM-001",
+        "resultat": 6000
+      },
+      "domaine": "LMNP",
+      "criticite": "MOYENNE"
+    },
+    {
+      "id": "lmnp-004",
+      "level": "standard",
+      "question": "Mon LMNP est déficitaire de 3 000 € en 2025. Puis-je déduire ce déficit de mes revenus salariaux ?",
+      "expected_citations": ["CGI Art. 156"],
+      "expected_contains": ["non", "BIC non professionnel", "10 ans", "report"],
+      "expected_millesime": "2025",
+      "expected_calc": null,
+      "domaine": "LMNP",
+      "criticite": "MOYENNE"
+    },
+    {
+      "id": "lmnp-005",
+      "level": "complex",
+      "question": "J'ai vendu un appartement LMNP acquis 220 000 € en 2015, revendu 320 000 € en 2026. Amortissements déduits : 45 000 €. Calcule la PV imposable.",
+      "expected_citations": ["CGI Art. 150 U", "CGI Art. 150 VB", "FORM-002"],
+      "expected_contains": ["réintégration", "amortissements", "95 500", "abattement", "IR", "PS", "19 %", "17,2 %"],
+      "expected_millesime": "2025",
+      "expected_calc": {
+        "formule": "FORM-002",
+        "pv_brute_attendue": 95500,
+        "pv_nette_ir_attendue": 61120
+      },
+      "domaine": "LMNP",
+      "criticite": "ELEVEE"
+    },
+    {
+      "id": "lmnp-006",
+      "level": "complex",
+      "question": "Vente en 2027 d'un LMNP détenu 10 ans : prix d'acquisition 180 000 €, vendu 300 000 €, amortissements déduits depuis 2025 : 40 000 €. Quelle PV ?",
+      "expected_citations": ["CGI Art. 150 U", "CGI Art. 150 VB"],
+      "expected_contains": ["réintégration", "abattement", "30 %", "5 %"],
+      "expected_millesime": "2025",
+      "expected_calc": {
+        "formule": "FORM-002",
+        "duree": 10
+      },
+      "domaine": "LMNP",
+      "criticite": "ELEVEE"
+    },
+    {
+      "id": "lmnp-007",
+      "level": "standard",
+      "question": "Je loue un bien meublé 12 000 €/an avec 4 000 € de charges. Micro-BIC ou réel ?",
+      "expected_citations": ["CGI Art. 50-0"],
+      "expected_contains": ["micro", "réel", "abattement", "amortissement", "30 %"],
+      "expected_millesime": "2025",
+      "expected_calc": null,
+      "domaine": "LMNP",
+      "criticite": "MOYENNE"
+    },
+    {
+      "id": "lmnp-008",
+      "level": "standard",
+      "question": "Mon CA en location meublée touristique non classée est de 18 000 € en 2025. Quel régime fiscal ?",
+      "expected_citations": ["CGI Art. 50-0"],
+      "expected_contains": ["micro-BIC", "30 %", "15 000", "réel"],
+      "expected_millesime": "2025",
+      "expected_calc": null,
+      "domaine": "LMNP",
+      "criticite": "MOYENNE"
+    },
+    {
+      "id": "lmnp-009",
+      "level": "complex",
+      "question": "Résidence étudiante meublée acquise 250 000 € en 2018, vendue 350 000 € en 2026. Amortissements déduits 60 000 €. Quelle PV ?",
+      "expected_citations": ["CGI Art. 150 U", "CGI Art. 150 VB"],
+      "expected_contains": ["exception", "étudiant", "ancienne formule", "pas de réintégration"],
+      "expected_millesime": "2025",
+      "expected_calc": {
+        "formule": "FORM-002",
+        "exception_etudiant": true
+      },
+      "domaine": "LMNP",
+      "criticite": "ELEVEE"
+    },
+    {
+      "id": "lmnp-010",
+      "level": "complex",
+      "question": "Je suis LMNP. Je dépasse 23 000 € de recettes et 50 % de mes revenus globaux. Que se passe-t-il ?",
+      "expected_citations": ["CGI Art. 155 IV"],
+      "expected_contains": ["LMP", "professionnel", "cotisations", "URSSAF"],
+      "expected_millesime": "2025",
+      "expected_calc": null,
+      "domaine": "LMNP",
+      "criticite": "ELEVEE"
+    },
+    {
+      "id": "lmnp-011",
+      "level": "simple",
+      "question": "Combien de temps puis-je reporter les amortissements régulièrement différés (ARD) en LMNP ?",
+      "expected_citations": ["CGI Art. 39 C"],
+      "expected_contains": ["sans limite", "report", "exercice bénéficiaire", "perdus", "vente"],
+      "expected_millesime": "2025",
+      "expected_calc": null,
+      "domaine": "LMNP",
+      "criticite": "MOYENNE"
+    },
+    {
+      "id": "lmnp-012",
+      "level": "complex",
+      "question": "Je suis LMNP avec un bien tourisme classé. Le régime fiscal est-il différent du non classé ?",
+      "expected_citations": ["CGI Art. 50-0"],
+      "expected_contains": ["classé", "non classé", "abattement", "71 %", "30 %", "188 700", "77 700"],
+      "expected_millesime": "2025",
+      "expected_calc": null,
+      "domaine": "LMNP",
+      "criticite": "MOYENNE"
+    }
+  ]
+}
