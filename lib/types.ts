@@ -25,6 +25,7 @@ export interface OrchestratorOutput {
   irreversible: boolean;
   profondeur: Profondeur;
   raison_courte: string;
+  _meta?: { provider: string; model: string };
 }
 
 /** Gem clone — raw response from the Gemini-cloned Gem. */
@@ -58,6 +59,7 @@ export interface ReviewerOutput {
   ecarts: string[];
   score_confiance: number; // 0.0–1.0
   commentaire_court: string;
+  _meta?: { provider: string; model: string };
 }
 
 /** Quality Gate — deterministic final check, never silent failure. */

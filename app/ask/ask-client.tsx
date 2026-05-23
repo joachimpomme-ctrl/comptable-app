@@ -340,7 +340,11 @@ export function AskClient() {
                 <TraceItem
                   index="01"
                   title="Orchestrateur"
-                  model="Gemini Flash · JSON"
+                  model={
+                    state.orchestrator?.output._meta
+                      ? `${formatProvider(state.orchestrator.output._meta)} · JSON`
+                      : "JSON mode"
+                  }
                   latency={state.orchestrator?.latency_ms}
                   done={!!state.orchestrator}
                   pending={isLoading && !state.orchestrator}
@@ -447,7 +451,11 @@ export function AskClient() {
                   <TraceItem
                     index="04"
                     title="Reviewer"
-                    model="Gemini Pro · audit"
+                    model={
+                      state.reviewer?.output._meta
+                        ? `${formatProvider(state.reviewer.output._meta)} · audit`
+                        : "audit"
+                    }
                     latency={state.reviewer?.latency_ms}
                     done={!!state.reviewer}
                     pending={isLoading && !state.reviewer && !!state.gem}
@@ -549,6 +557,19 @@ export function AskClient() {
       </footer>
     </div>
   );
+}
+
+function formatProvider(meta: { provider: string; model: string }): string {
+  const providerShort =
+    meta.provider === "anthropic" ? "Claude" : "Gemini";
+  // Model display: strip "claude-" / "gemini-" prefix and the date suffix.
+  let modelShort = meta.model
+    .replace(/^claude-/, "")
+    .replace(/^gemini-/, "")
+    .replace(/-2025\d{4}$/, "")
+    .replace(/-2026\d{4}$/, "");
+  // Keep Haiku/Sonnet/Opus or Flash/Pro labels short.
+  return `${providerShort} ${modelShort}`;
 }
 
 function Check({ ok, children }: { ok: boolean; children: React.ReactNode }) {

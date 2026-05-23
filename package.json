@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.79",
+    "@anthropic-ai/sdk": "^0.98.0",
     "@google/genai": "^2.6.0",
     "ai": "^6.0.191",
     "google-auth-library": "^10.6.2",

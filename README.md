@@ -9,9 +9,31 @@ Voir `../../Projet_Compta_Multi_Agents.html` à la racine du projet pour la docu
 ```bash
 cp .env.local.example .env.local
 # Renseigner GEMINI_API_KEY (https://aistudio.google.com/apikey)
+# Optionnel : ANTHROPIC_API_KEY (https://console.anthropic.com/settings/keys)
 # Optionnel : SHEETS_ID + SHEETS_SERVICE_ACCOUNT_B64 pour la persistance
 npm install
 ```
+
+## Multi-provider — Gemini + Claude
+
+Chaque agent peut tourner sur Gemini OU Claude, configuré par variable d'env :
+
+| Agent | Var provider | Var modèle | Défaut |
+|---|---|---|---|
+| Orchestrateur | `AGENT_ORCH_PROVIDER` | `AGENT_ORCH_MODEL` | gemini · 2.5 Flash |
+| Reviewer | `AGENT_REVIEWER_PROVIDER` | `AGENT_REVIEWER_MODEL` | **anthropic · Sonnet 4.6** |
+| Reviewer (irréversible) | (auto-upgrade) | `AGENT_REVIEWER_IRREVERSIBLE_MODEL` | claude-opus-4-7 |
+| Param extractor | `AGENT_PARAM_PROVIDER` | `AGENT_PARAM_MODEL` | gemini · 2.5 Flash |
+| Gem cloné | (toujours Gemini) | `GEMINI_MODEL_FAST` | gemini-2.5-flash |
+
+**Configuration par défaut hybride** :
+- Gemini Flash → Gem cloné, Orchestrateur, Param extractor (fidélité production)
+- **Claude Sonnet 4.6 → Reviewer** (diversité cognitive vs Gemini)
+- Claude Opus 4.7 → Reviewer sur décisions irréversibles (option IS SCI, démembrement…)
+
+Si `ANTHROPIC_API_KEY` est absente, tout retombe sur Gemini automatiquement.
+
+La trace affiche le provider/modèle utilisé pour chaque étape.
 
 ## Scripts
 

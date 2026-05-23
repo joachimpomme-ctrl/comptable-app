@@ -29,6 +29,48 @@ export const env = {
   get GEMINI_MODEL_PRO() {
     return optional("GEMINI_MODEL_PRO", "gemini-2.5-pro");
   },
+  // --- Anthropic ---
+  get ANTHROPIC_API_KEY() {
+    return required("ANTHROPIC_API_KEY");
+  },
+  get ANTHROPIC_ENABLED() {
+    return (
+      !!process.env.ANTHROPIC_API_KEY &&
+      process.env.ANTHROPIC_API_KEY !== "__REPLACE_ME__"
+    );
+  },
+  get CLAUDE_MODEL_HAIKU() {
+    return optional("CLAUDE_MODEL_HAIKU", "claude-haiku-4-5-20251001");
+  },
+  get CLAUDE_MODEL_SONNET() {
+    return optional("CLAUDE_MODEL_SONNET", "claude-sonnet-4-6");
+  },
+  get CLAUDE_MODEL_OPUS() {
+    return optional("CLAUDE_MODEL_OPUS", "claude-opus-4-7");
+  },
+  // --- Per-agent provider routing ---
+  get AGENT_ORCH_PROVIDER() {
+    return optional("AGENT_ORCH_PROVIDER", "gemini");
+  },
+  get AGENT_ORCH_MODEL() {
+    return process.env.AGENT_ORCH_MODEL || "";
+  },
+  get AGENT_REVIEWER_PROVIDER() {
+    return optional("AGENT_REVIEWER_PROVIDER", "gemini");
+  },
+  get AGENT_REVIEWER_MODEL() {
+    return process.env.AGENT_REVIEWER_MODEL || "";
+  },
+  get AGENT_REVIEWER_IRREVERSIBLE_MODEL() {
+    return process.env.AGENT_REVIEWER_IRREVERSIBLE_MODEL || "";
+  },
+  get AGENT_PARAM_PROVIDER() {
+    return optional("AGENT_PARAM_PROVIDER", "gemini");
+  },
+  get AGENT_PARAM_MODEL() {
+    return process.env.AGENT_PARAM_MODEL || "";
+  },
+  // --- Sheets ---
   get SHEETS_ID() {
     return process.env.SHEETS_ID ?? "";
   },

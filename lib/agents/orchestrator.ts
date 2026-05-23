@@ -1,13 +1,13 @@
 /**
  * AGENT-1 — Orchestrator.
- * Classifies the user query in <1s using Gemini Flash + JSON response mode.
- * Decides which downstream agents to invoke (Gem only / Gem+Calc / +Reviewer).
+ * Classifies the user query in <1s.
+ * Provider chosen via AGENT_ORCH_PROVIDER (default: gemini).
  */
 
 import { Type } from "@google/genai";
 import { z } from "zod";
 
-import { getGenai } from "../gemini-client";
+import { callJson, resolveAgentProvider } from "../llm/json-call";
 import { env } from "../env";
 import type { OrchestratorOutput } from "../types";
 
@@ -41,70 +41,70 @@ const Schema = z.object({
   raison_courte: z.string().min(1).max(160),
 });
 
-/**
- * Response schema for Gemini structured output.
- * We use the @google/genai Schema format with explicit Type enums.
- */
-const RESPONSE_SCHEMA = {
+const PROPS = {
+  domaine: { enum: ["LMNP", "BNC", "BIC", "FONCIER", "IFI", "SUCCESSION", "EPARGNE", "AUTRE"] },
+  criticite: { enum: ["FAIBLE", "MOYENNE", "ELEVEE"] },
+  besoin_calcul: { type: "boolean" },
+  irreversible: { type: "boolean" },
+  profondeur: { enum: ["SIMPLE", "STANDARD", "APPROFONDI"] },
+  raison_courte: { type: "string" },
+};
+
+const REQUIRED = [
+  "domaine",
+  "criticite",
+  "besoin_calcul",
+  "irreversible",
+  "profondeur",
+  "raison_courte",
+];
+
+const GEMINI_SCHEMA = {
   type: Type.OBJECT,
   properties: {
-    domaine: {
-      type: Type.STRING,
-      enum: ["LMNP", "BNC", "BIC", "FONCIER", "IFI", "SUCCESSION", "EPARGNE", "AUTRE"],
-    },
-    criticite: {
-      type: Type.STRING,
-      enum: ["FAIBLE", "MOYENNE", "ELEVEE"],
-    },
+    domaine: { type: Type.STRING, enum: PROPS.domaine.enum },
+    criticite: { type: Type.STRING, enum: PROPS.criticite.enum },
     besoin_calcul: { type: Type.BOOLEAN },
     irreversible: { type: Type.BOOLEAN },
-    profondeur: {
-      type: Type.STRING,
-      enum: ["SIMPLE", "STANDARD", "APPROFONDI"],
-    },
+    profondeur: { type: Type.STRING, enum: PROPS.profondeur.enum },
     raison_courte: { type: Type.STRING },
   },
-  required: [
-    "domaine",
-    "criticite",
-    "besoin_calcul",
-    "irreversible",
-    "profondeur",
-    "raison_courte",
-  ],
-  propertyOrdering: [
-    "domaine",
-    "criticite",
-    "besoin_calcul",
-    "irreversible",
-    "profondeur",
-    "raison_courte",
-  ],
+  required: REQUIRED,
+  propertyOrdering: REQUIRED,
+};
+
+const ANTHROPIC_SCHEMA = {
+  type: "object",
+  properties: {
+    domaine: { type: "string", enum: PROPS.domaine.enum },
+    criticite: { type: "string", enum: PROPS.criticite.enum },
+    besoin_calcul: { type: "boolean" },
+    irreversible: { type: "boolean" },
+    profondeur: { type: "string", enum: PROPS.profondeur.enum },
+    raison_courte: { type: "string" },
+  },
+  required: REQUIRED,
 };
 
 export async function orchestrate(
   question: string,
 ): Promise<OrchestratorOutput> {
-  const result = await getGenai().models.generateContent({
-    model: env.GEMINI_MODEL_FAST,
-    contents: `QUESTION UTILISATEUR :\n${question}`,
-    config: {
-      systemInstruction: SYSTEM_INSTRUCTION,
-      temperature: 0.0,
-      responseMimeType: "application/json",
-      responseSchema: RESPONSE_SCHEMA,
-    },
+  const { provider, model } = resolveAgentProvider({
+    envProvider: env.AGENT_ORCH_PROVIDER,
+    envModel: env.AGENT_ORCH_MODEL,
+    defaultGeminiModel: env.GEMINI_MODEL_FAST,
+    defaultClaudeModel: env.CLAUDE_MODEL_HAIKU,
   });
 
-  const text = result.text ?? "";
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    throw new Error(
-      `Orchestrator returned non-JSON output: ${text.slice(0, 200)}`,
-    );
-  }
+  const { data } = await callJson({
+    provider,
+    model,
+    systemInstruction: SYSTEM_INSTRUCTION,
+    userPrompt: `QUESTION UTILISATEUR :\n${question}`,
+    zodSchema: Schema,
+    geminiSchema: GEMINI_SCHEMA,
+    anthropicSchema: ANTHROPIC_SCHEMA,
+  });
 
-  return Schema.parse(parsed);
+  return { ...data, _meta: { provider, model } };
 }

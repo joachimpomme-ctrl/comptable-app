@@ -1,20 +1,23 @@
 /**
  * AGENT-3 — Reviewer.
- * Challenges the Gem's response with Gemini 2.5 Pro.
+ * Challenges the Gem's response. Provider chosen via AGENT_REVIEWER_PROVIDER
+ * (default: gemini — switch to "anthropic" for cognitive diversity).
  *
  * Strategy: the Reviewer does NOT recompute (FORM-001/002 lives in the
  * Calculator). It evaluates coherence: citations plausible? millésime
  * consistent? omissions on irreversible decisions? signal of "candidate_to_validate"
  * mistakenly presented as definitive?
  *
- * The Calculator's deterministic result is also injected when available,
- * so the Reviewer can cross-check.
+ * The Calculator's deterministic result is injected when available so the
+ * Reviewer can cross-check.
+ *
+ * On irreversible decisions, an upgraded model (Opus 4.7) is used if configured.
  */
 
 import { Type } from "@google/genai";
 import { z } from "zod";
 
-import { getGenai } from "../gemini-client";
+import { callJson, resolveAgentProvider } from "../llm/json-call";
 import { env } from "../env";
 import type {
   ReviewerOutput,
@@ -38,7 +41,7 @@ Critères d'audit :
 Verdicts possibles :
 - VALIDÉ : aucun écart bloquant détecté.
 - À_CORRIGER : un ou plusieurs écarts précis, formulables.
-- DIVERGENCE : la réponse semble fondamentalement à côté de la question (mauvais régime, mauvaise référence légale).
+- DIVERGENCE : la réponse semble fondamentalement à côté de la question.
 
 Score de confiance : 0.0 (catastrophe) à 1.0 (parfait).
 Commentaire court : 1 phrase synthétique, ≤ 180 caractères.`;
@@ -51,32 +54,37 @@ const Schema = z.object({
   commentaire_court: z.string().min(1).max(220),
 });
 
-const RESPONSE_SCHEMA = {
+const REQUIRED = [
+  "verdict",
+  "citations_verifiees",
+  "ecarts",
+  "score_confiance",
+  "commentaire_court",
+];
+
+const GEMINI_SCHEMA = {
   type: Type.OBJECT,
   properties: {
-    verdict: {
-      type: Type.STRING,
-      enum: ["VALIDÉ", "À_CORRIGER", "DIVERGENCE"],
-    },
+    verdict: { type: Type.STRING, enum: ["VALIDÉ", "À_CORRIGER", "DIVERGENCE"] },
     citations_verifiees: { type: Type.ARRAY, items: { type: Type.STRING } },
     ecarts: { type: Type.ARRAY, items: { type: Type.STRING } },
     score_confiance: { type: Type.NUMBER },
     commentaire_court: { type: Type.STRING },
   },
-  required: [
-    "verdict",
-    "citations_verifiees",
-    "ecarts",
-    "score_confiance",
-    "commentaire_court",
-  ],
-  propertyOrdering: [
-    "verdict",
-    "citations_verifiees",
-    "ecarts",
-    "score_confiance",
-    "commentaire_court",
-  ],
+  required: REQUIRED,
+  propertyOrdering: REQUIRED,
+};
+
+const ANTHROPIC_SCHEMA = {
+  type: "object",
+  properties: {
+    verdict: { type: "string", enum: ["VALIDÉ", "À_CORRIGER", "DIVERGENCE"] },
+    citations_verifiees: { type: "array", items: { type: "string" } },
+    ecarts: { type: "array", items: { type: "string" } },
+    score_confiance: { type: "number", minimum: 0, maximum: 1 },
+    commentaire_court: { type: "string" },
+  },
+  required: REQUIRED,
 };
 
 export async function review(args: {
@@ -85,6 +93,22 @@ export async function review(args: {
   gem: GemResponse;
   calculator?: CalculatorResult[];
 }): Promise<ReviewerOutput> {
+  // On irreversible decisions, prefer the upgraded Opus model if configured.
+  let envProvider = env.AGENT_REVIEWER_PROVIDER;
+  let envModel = env.AGENT_REVIEWER_MODEL;
+  if (args.orchestration.irreversible && env.AGENT_REVIEWER_IRREVERSIBLE_MODEL) {
+    envModel = env.AGENT_REVIEWER_IRREVERSIBLE_MODEL;
+    // Use anthropic when an Opus-style upgrade is configured (claude-opus-…)
+    if (envModel.includes("claude")) envProvider = "anthropic";
+  }
+
+  const { provider, model } = resolveAgentProvider({
+    envProvider,
+    envModel,
+    defaultGeminiModel: env.GEMINI_MODEL_PRO,
+    defaultClaudeModel: env.CLAUDE_MODEL_SONNET,
+  });
+
   const calcBlock = args.calculator?.length
     ? `\n\nRÉSULTAT(S) DU CALCULATEUR DÉTERMINISTE (cf. FORM-XXX) :\n${args.calculator
         .map(
@@ -111,25 +135,15 @@ ${calcBlock}
 
 Émets ton verdict en JSON strict.`;
 
-  const result = await getGenai().models.generateContent({
-    model: env.GEMINI_MODEL_PRO,
-    contents: userPrompt,
-    config: {
-      systemInstruction: SYSTEM_INSTRUCTION,
-      temperature: 0.0,
-      responseMimeType: "application/json",
-      responseSchema: RESPONSE_SCHEMA,
-    },
+  const { data } = await callJson({
+    provider,
+    model,
+    systemInstruction: SYSTEM_INSTRUCTION,
+    userPrompt,
+    zodSchema: Schema,
+    geminiSchema: GEMINI_SCHEMA,
+    anthropicSchema: ANTHROPIC_SCHEMA,
   });
 
-  const text = result.text ?? "";
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    throw new Error(
-      `Reviewer returned non-JSON output: ${text.slice(0, 200)}`,
-    );
-  }
-  return Schema.parse(parsed);
+  return { ...data, _meta: { provider, model } };
 }
