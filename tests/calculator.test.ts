@@ -16,47 +16,47 @@ import {
 // ============================================================
 // Abattements
 // ============================================================
-test("abattementIR — 0 % avant 6 ans", () => {
-  expect(abattementIR(0)).toBe(0);
-  expect(abattementIR(5)).toBe(0);
+test("abattementIR — 0 % avant 6 ans", async () => {
+  expect(await abattementIR(0)).toBe(0);
+  expect(await abattementIR(5)).toBe(0);
 });
 
-test("abattementIR — 6 % linéaire de 6 à 21 ans", () => {
-  expect(abattementIR(6)).toBeCloseTo(0.06, 9);
-  expect(abattementIR(11)).toBeCloseTo(0.36, 9);
-  expect(abattementIR(21)).toBeCloseTo(0.96, 9);
+test("abattementIR — 6 % linéaire de 6 à 21 ans", async () => {
+  expect(await abattementIR(6)).toBeCloseTo(0.06, 9);
+  expect(await abattementIR(11)).toBeCloseTo(0.36, 9);
+  expect(await abattementIR(21)).toBeCloseTo(0.96, 9);
 });
 
-test("abattementIR — exo à 22 ans", () => {
-  expect(abattementIR(22)).toBe(1);
-  expect(abattementIR(30)).toBe(1);
+test("abattementIR — exo à 22 ans", async () => {
+  expect(await abattementIR(22)).toBe(1);
+  expect(await abattementIR(30)).toBe(1);
 });
 
-test("abattementPS — 0 % avant 6 ans", () => {
-  expect(abattementPS(5)).toBe(0);
+test("abattementPS — 0 % avant 6 ans", async () => {
+  expect(await abattementPS(5)).toBe(0);
 });
 
-test("abattementPS — 1,65 % linéaire de 6 à 21 ans", () => {
-  expect(abattementPS(6)).toBeCloseTo(0.0165, 9);
-  expect(abattementPS(11)).toBeCloseTo(0.099, 9);
+test("abattementPS — 1,65 % linéaire de 6 à 21 ans", async () => {
+  expect(await abattementPS(6)).toBeCloseTo(0.0165, 9);
+  expect(await abattementPS(11)).toBeCloseTo(0.099, 9);
 });
 
-test("abattementPS — paliers 22 et 23-30 ans", () => {
-  expect(abattementPS(22)).toBeCloseTo(0.264 + 0.016, 9);
-  expect(abattementPS(30)).toBeCloseTo(1, 9);
+test("abattementPS — paliers 22 et 23-30 ans", async () => {
+  expect(await abattementPS(22)).toBeCloseTo(0.264 + 0.016, 9);
+  expect(await abattementPS(30)).toBeCloseTo(1, 9);
 });
 
-test("taxeSupplementaire — exonération sous 50k", () => {
-  expect(taxeSupplementaire(49_999)).toBe(0);
-  expect(taxeSupplementaire(50_000)).toBe(0);
+test("taxeSupplementaire — exonération sous 50k", async () => {
+  expect(await taxeSupplementaire(49_999)).toBe(0);
+  expect(await taxeSupplementaire(50_000)).toBe(0);
 });
 
-test("taxeSupplementaire — palier 60-100k à 2 %", () => {
-  expect(taxeSupplementaire(80_000)).toBe(1_600);
+test("taxeSupplementaire — palier 60-100k à 2 %", async () => {
+  expect(await taxeSupplementaire(80_000)).toBe(1_600);
 });
 
-test("taxeSupplementaire — palier > 260k à 6 %", () => {
-  expect(taxeSupplementaire(300_000)).toBe(18_000);
+test("taxeSupplementaire — palier > 260k à 6 %", async () => {
+  expect(await taxeSupplementaire(300_000)).toBe(18_000);
 });
 
 // ============================================================
@@ -112,8 +112,8 @@ test("FORM-001 — imputation ARD antérieur sur exercice bénéficiaire", () =>
 // ============================================================
 // FORM-002 — Plus-value LMNP 2025
 // ============================================================
-test("FORM-002 — cas standard détention 11 ans avec réintégration", () => {
-  const r = computeForm002({
+test("FORM-002 — cas standard détention 11 ans avec réintégration", async () => {
+  const r = await computeForm002({
     prix_cession: 320_000,
     prix_acquisition: 220_000,
     amortissements_deduits: 45_000,
@@ -126,8 +126,8 @@ test("FORM-002 — cas standard détention 11 ans avec réintégration", () => {
   expect(pvIR?.val).toBe(61_120);
 });
 
-test("FORM-002 — exo IR à 22 ans", () => {
-  const r = computeForm002({
+test("FORM-002 — exo IR à 22 ans", async () => {
+  const r = await computeForm002({
     prix_cession: 400_000,
     prix_acquisition: 200_000,
     amortissements_deduits: 50_000,
@@ -139,8 +139,8 @@ test("FORM-002 — exo IR à 22 ans", () => {
   expect(ir?.val).toBe(0);
 });
 
-test("FORM-002 — exception résidence étudiant : pas de réintégration", () => {
-  const r = computeForm002({
+test("FORM-002 — exception résidence étudiant : pas de réintégration", async () => {
+  const r = await computeForm002({
     prix_cession: 320_000,
     prix_acquisition: 220_000,
     amortissements_deduits: 45_000,
@@ -151,8 +151,8 @@ test("FORM-002 — exception résidence étudiant : pas de réintégration", () 
   expect(pvBrute?.val).toBe(50_500);
 });
 
-test("FORM-002 — détention ≤ 5 ans : pas de forfait, pas d'abattement", () => {
-  const r = computeForm002({
+test("FORM-002 — détention ≤ 5 ans : pas de forfait, pas d'abattement", async () => {
+  const r = await computeForm002({
     prix_cession: 250_000,
     prix_acquisition: 200_000,
     amortissements_deduits: 20_000,
@@ -164,8 +164,8 @@ test("FORM-002 — détention ≤ 5 ans : pas de forfait, pas d'abattement", () 
   expect(ir?.val).toBe(13_300);
 });
 
-test("FORM-002 — montants réels priment sur forfaits", () => {
-  const r = computeForm002({
+test("FORM-002 — montants réels priment sur forfaits", async () => {
+  const r = await computeForm002({
     prix_cession: 320_000,
     prix_acquisition: 220_000,
     amortissements_deduits: 45_000,

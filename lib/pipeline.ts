@@ -130,7 +130,7 @@ export async function* runPipeline(
     try {
       const params = await extractForm002Params(question);
       if (params) {
-        const result = computeForm002(params);
+        const result = await computeForm002(params);
         calculatorResults.push(result);
         yield { kind: "calculator", output: result };
       }

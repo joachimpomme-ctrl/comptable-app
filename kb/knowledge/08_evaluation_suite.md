@@ -274,7 +274,7 @@
 - Contexte : Cession d'un appartement détenu 14 ans, prix vente 280 000 €, prix achat 180 000 €, frais achat réels 12 600 €, travaux 15 000 € il y a 3 ans.
 - Question : Calcule ma plus-value nette imposable et le montant d'impôt dû.
 - Règles attendues : CGI Art. 150 U, 150 VB (M_CGI) ; M9
-- Critères de succès : cite Art. 150 U et 150 VB, calcul PV brute = 87 400 €, abattements durée IR (14 ans = 8 ans × 6 % = 48 %), PV nette IR = 45 448 €, taux 19 % IR + 17,2 % PS, surtaxe si > 50 000 € vérifiée, résultat ~16 200 € IR + ~7 817 € PS
+- Critères de succès : cite Art. 150 U et 150 VB, prix de revient = 207 600 € (180 000 + frais réels 12 600 + travaux 15 000), PV brute = 72 400 €, abattement durée IR (14 ans = 9 ans × 6 % = 54 %), PV nette IR = 33 304 €, abattement durée PS (9 ans × 1,65 % = 14,85 %), PV nette PS = 61 649 €, taux 19 % IR + 17,2 % PS, résultat ~6 328 € IR + ~10 604 € PS, surtaxe non applicable (PV nette IR 33 304 € < 50 000 €)
 
 ## EV-032 | declaration_citations_cgi_obligatoires
 - Fonction : conformite
@@ -314,7 +314,8 @@
 - Contexte : Kinésithérapeute libéral, revenus nets BNC 2025 = 70 000 €.
 - Question : Estimez mes principales cotisations sociales URSSAF et CARPIMKO pour 2025.
 - Règles attendues : M13 (PASS 2025, taux URSSAF, CARPIMKO)
-- Critères de succès : utilise PASS 2025 = 46 368 €, calcule maladie ~4 550 €, retraite base ~8 225 €, CSG/CRDS ~6 650 €, CARPIMKO retraite base ~5 761 €, signale que les montants CARPIMKO complémentaires sont forfaitaires, alerte sur régularisation N-2, validation auprès de la caisse recommandée
+- Critères de succès : utilise PASS 2025 = 47 100 €, calcule maladie ~4 550 € (6,5 %), retraite de base CNAVPL/CARPIMKO ~4 305 € (8,23 % jusqu'au PASS + 1,87 % de 1 à 5 PASS, soit 3 876 € + 428 €), CSG/CRDS ~6 790 € (9,7 %), signale que les cotisations CARPIMKO complémentaire et invalidité-décès sont forfaitaires (par classe) et non estimées ici, alerte sur régularisation N-2, précise que les taux de cotisation ne sont pas dans le référentiel (à confirmer URSSAF/CARPIMKO), validation auprès de la caisse recommandée
+- Note de fiabilité : l'ancien attendu de retraite de base et de CSG/CRDS était FAUX (sur-estimé). Valeurs recalculées indépendamment ; oracle de référence dans scripts/run_evals.py (fonction cotisations_tns_carpimko) et fixture tests/cas_evaluation.json (EV-036).
 
 ## EV-037 | bareme_kilometrique_2025
 - Fonction : fiscalite_BNC

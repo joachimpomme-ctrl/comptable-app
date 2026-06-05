@@ -27,6 +27,7 @@ import {
   taxeSupplementaire,
   round2,
 } from "./abattements";
+import { getParam, millesimeCourant } from "../../kb/referentiel";
 
 export interface Form002Params {
   prix_cession: number;
@@ -36,28 +37,50 @@ export interface Form002Params {
   frais_acquisition_reels?: number;
   travaux_reels?: number;
   exception_etudiant?: boolean;
+  /** Annee de la cession : sert de millesime pour lire le referentiel.
+   *  Defaut = millesime_courant du referentiel. */
+  annee_cession?: number;
 }
 
 const VERSION = "1.0";
-const TAUX_IR = 0.19;
-const TAUX_PS = 0.172;
 
-export function computeForm002(p: Form002Params): CalculatorResult {
+/** Fraction (ex. 0.172) -> libelle pourcentage FR sans zero superflu (ex. "17,2"). */
+function pct(fraction: number): string {
+  const v = Math.round(fraction * 100 * 1000) / 1000; // % avec garde anti-bruit float
+  return String(v).replace(".", ",");
+}
+
+export async function computeForm002(
+  p: Form002Params,
+): Promise<CalculatorResult> {
   const duree = Math.max(0, p.duree_detention_annees);
   const longueDetention = duree > 5;
+
+  // Millesime : annee de cession si fournie, sinon millesime courant du referentiel.
+  const millesime = p.annee_cession ?? (await millesimeCourant());
+
+  // Taux et forfaits lus dans le referentiel (% numerique -> fraction /100).
+  const tauxIR = (await getParam("pv_immo_taux_ir", millesime)) / 100;
+  const tauxPS =
+    (await getParam("pv_immo_taux_prelevements_sociaux", millesime)) / 100;
+  const forfaitFrais =
+    (await getParam("pv_immo_forfait_frais_acquisition", millesime)) / 100;
+  const forfaitTravaux =
+    (await getParam("pv_immo_forfait_travaux", millesime)) / 100;
+  const surtaxeSeuil = await getParam("pv_immo_surtaxe_seuil", millesime);
 
   const fraisAcquisition =
     p.frais_acquisition_reels !== undefined
       ? p.frais_acquisition_reels
       : longueDetention
-        ? p.prix_acquisition * 0.075
+        ? p.prix_acquisition * forfaitFrais
         : 0;
 
   const travaux =
     p.travaux_reels !== undefined
       ? p.travaux_reels
       : longueDetention
-        ? p.prix_acquisition * 0.15
+        ? p.prix_acquisition * forfaitTravaux
         : 0;
 
   const prixAcquisitionMajore =
@@ -70,15 +93,15 @@ export function computeForm002(p: Form002Params): CalculatorResult {
     p.prix_cession - (prixAcquisitionMajore - amortReintegres),
   );
 
-  const abatIR = abattementIR(duree);
-  const abatPS = abattementPS(duree);
+  const abatIR = await abattementIR(duree, millesime);
+  const abatPS = await abattementPS(duree, millesime);
 
   const pvNetteIR = pvBrute * (1 - abatIR);
   const pvNettePS = pvBrute * (1 - abatPS);
 
-  const ir = pvNetteIR * TAUX_IR;
-  const ps = pvNettePS * TAUX_PS;
-  const taxeSup = taxeSupplementaire(pvNetteIR);
+  const ir = pvNetteIR * tauxIR;
+  const ps = pvNettePS * tauxPS;
+  const taxeSup = await taxeSupplementaire(pvNetteIR, millesime);
 
   const totalImposition = ir + ps + taxeSup;
 
@@ -92,7 +115,7 @@ export function computeForm002(p: Form002Params): CalculatorResult {
         p.frais_acquisition_reels !== undefined
           ? "Montant réel fourni"
           : longueDetention
-            ? "Forfait 7,5 % (détention > 5 ans)"
+            ? `Forfait ${pct(forfaitFrais)} % (détention > 5 ans)`
             : "Aucun (détention ≤ 5 ans)",
     },
     {
@@ -102,7 +125,7 @@ export function computeForm002(p: Form002Params): CalculatorResult {
         p.travaux_reels !== undefined
           ? "Montant réel fourni"
           : longueDetention
-            ? "Forfait 15 % (détention > 5 ans)"
+            ? `Forfait ${pct(forfaitTravaux)} % (détention > 5 ans)`
             : "Aucun (détention ≤ 5 ans)",
     },
     {
@@ -133,12 +156,15 @@ export function computeForm002(p: Form002Params): CalculatorResult {
     },
     { label: "PV nette imposable IR", val: round2(pvNetteIR) },
     { label: "PV nette imposable PS", val: round2(pvNettePS) },
-    { label: "IR (19 %)", val: round2(ir) },
-    { label: "PS (17,2 %)", val: round2(ps) },
+    { label: `IR (${pct(tauxIR)} %)`, val: round2(ir) },
+    { label: `PS (${pct(tauxPS)} %)`, val: round2(ps) },
     {
       label: "Taxe supplémentaire",
       val: round2(taxeSup),
-      note: pvNetteIR > 50_000 ? "Barème CGI 1609 nonies G" : "Non due (< 50 000 €)",
+      note:
+        pvNetteIR > surtaxeSeuil
+          ? "Barème CGI 1609 nonies G"
+          : `Non due (< ${surtaxeSeuil.toLocaleString("fr-FR")} €)`,
     },
     {
       label: "TOTAL imposition",

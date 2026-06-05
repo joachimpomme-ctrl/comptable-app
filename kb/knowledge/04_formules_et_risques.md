@@ -217,17 +217,17 @@ RISQUE: Non-respect des engagements de conservation dans un Pacte Dutreil → re
 
 ---
 
-## BARÈMES DE RÉFÉRENCE (Module M13 — millésime 2025)
+## BARÈMES DE RÉFÉRENCE (Module M13 — millésime 2025 — mise à jour 2026 en attente de sourcing)
 
 > **Statut :** `sourced` pour les taux URSSAF et barème kilométrique officiels. `candidate_to_validate` pour CARMF/CARPIMKO (forfaits votés annuellement — vérifier sur carmf.fr / carpimko.fr).  
 > **Mise à jour :** janvier de chaque année (PASS, taux URSSAF, barèmes km publiés par arrêté).
 
 ### [REF-001] PASS 2025
 
-**PASS annuel 2025 : 46 368 €** (= PASS 2024, pas de revalorisation LFI 2025)  
-PASS mensuel : 3 864 € | PASS journalier : 202 €
+**PASS annuel 2025 : 47 100 € [referentiel: PASS/2025]**  
+PASS mensuel : 3 925 € | PASS journalier : 204 €
 
-Utilisé pour : plafond PER (10 % PASS = 4 637 €), Madelin, retraite de base, seuil micro-BNC (102 ter), seuils micro-BIC.
+Utilisé pour : plafond PER (10 % PASS = 4 710 €), Madelin, retraite de base, seuil micro-BNC (102 ter), seuils micro-BIC.
 
 *Source : Arrêté ministériel — JO 2025*
 
@@ -238,7 +238,7 @@ Utilisé pour : plafond PER (10 % PASS = 4 637 €), Madelin, retraite de base, 
 | Cotisation | Base | Taux |
 |-----------|------|------|
 | Maladie-maternité | Revenus nets | 1,50 % (< 40 % PASS) → 6,50 % (> 110 % PASS) progressif |
-| Retraite de base | ≤ 1 PASS (46 368 €) | 17,75 % |
+| Retraite de base | ≤ 1 PASS (47 100 € [referentiel: PASS/2025]) | 17,75 % |
 | Retraite de base | > 1 PASS | 0,60 % |
 | Invalidité-décès | ≤ 1 PASS | 1,30 % |
 | Indemnités journalières | ≤ 3 PASS | 0,85 % |

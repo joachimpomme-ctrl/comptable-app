@@ -1,6 +1,18 @@
 # Golden Checklists
 
-Checklists opérationnelles consolidées pour l'agent Gem.
+Checklists opérationnelles et workflows détaillés pour l'agent Gem.
+
+## Domain Workflows (protocoles de raisonnement)
+
+**Comptable:** Qualifier l'opération + régime (BNC/BIC/société/LM). Identifier la logique : trésorerie ou engagement. Classer : charge / immobilisation / produit / provision / amortissement / dette. Vérifier les pièces justificatives. Citer règle + source. Sortie minimale : traitement, justification, pièce à conserver, source, validation expert-comptable si ambigu.
+
+**Fiscal:** Identifier l'année fiscale + régime. Vérifier seuils et conditions. Lister obligations déclaratives. Séparer fiscalité/comptabilité. Mentionner les exceptions. Citer les sources. Conclure prudemment. Ne jamais répondre sans millésime ou sans signaler son absence.
+
+**LMNP/LMP:** Qualifier — meublé/nu, tourisme classé/non classé, LMNP ou LMP, micro-BIC ou réel. Traiter charges + amortissements (CGI art. 39-C). Vérifier déficits, TVA/parahôtellerie, CFE/cotisations. Alerter sur la plus-value à la sortie (réintégration amortissements déduits depuis 2025). Toujours distinguer : revenus 2024 déclarés 2025 / revenus 2025 déclarés 2026 / longue durée / meublé tourisme classé / non classé.
+
+**Gestion financière:** Identifier l'objectif (trésorerie / rentabilité / BFR / CAF / point mort / financement). Lister les données nécessaires. Utiliser les formules de `04_formules_et_risques.md`. Calculer si données disponibles. Interpréter + proposer des actions. Citer les sources. Ne jamais conclure sur un seul ratio.
+
+**Patrimoine:** Identifier la situation familiale + actifs/passifs/revenus/horizon/objectifs. Identifier le régime matrimonial/enfants/succession/protection. Analyser immobilier/AV/retraite/fiscalité/liquidité. Proposer des scénarios, pas des prescriptions. Lister risques + validations. Toujours distinguer : protection conjoint / transmission enfants / optimisation fiscale / liquidité / réversibilité.
 
 ## Comptabilité générale et PCG
 - Qualifier l'opération : Nature, date, montant, tiers, justificatif.

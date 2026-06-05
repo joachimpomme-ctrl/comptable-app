@@ -29,9 +29,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const APP_DIR = path.resolve(__dirname, "..");
 const SRC_ROOT = path.resolve(APP_DIR, "..", "..", "PARTAGE");
+// Source de verite des chiffres fiscaux (lecture seule, jamais editee ici).
+const KB_CANONICAL = path.resolve(APP_DIR, "..", "..", "kb-canonical");
 
 const KB_TARGET = path.join(APP_DIR, "kb", "knowledge");
 const SYS_TARGET = path.join(APP_DIR, "kb", "system");
+const REF_TARGET = path.join(APP_DIR, "kb", "referentiel");
 
 const KB_FILES = [
   "01_decision_engine.md",
@@ -62,13 +65,36 @@ async function copyOne(src, dst) {
   await cp(src, dst);
 }
 
+async function syncReferentiel() {
+  // referentiel_parametres.json = source de verite des chiffres fiscaux.
+  // Vit uniquement dans kb-canonical/. On le COPIE (lecture seule) pour que
+  // lib/kb/referentiel.ts y accede au runtime sans dependre du Drive parent.
+  const src = path.join(KB_CANONICAL, "referentiel_parametres.json");
+  if (!existsSync(src)) {
+    console.warn(`[sync-kb] missing referentiel source: ${src}`);
+    return 0;
+  }
+  await copyOne(src, path.join(REF_TARGET, "referentiel_parametres.json"));
+  return 1;
+}
+
 async function main() {
+  // Le referentiel vit dans kb-canonical (independant de PARTAGE) : on le
+  // synchronise meme si PARTAGE est absent.
+  let refCopied = 0;
+  if (existsSync(KB_CANONICAL)) {
+    await ensureDir(REF_TARGET);
+    refCopied = await syncReferentiel();
+  } else {
+    console.warn(`[sync-kb] kb-canonical not found (${KB_CANONICAL}) — referentiel not refreshed.`);
+  }
+
   if (!existsSync(SRC_ROOT)) {
-    console.log(`[sync-kb] source root not found (${SRC_ROOT}) — assuming kb/ already populated. Skipping.`);
+    console.log(`[sync-kb] source root not found (${SRC_ROOT}) — assuming kb/ already populated. Skipping KB files (referentiel copied=${refCopied}).`);
     return;
   }
 
-  let copied = 0;
+  let copied = refCopied;
   let skipped = 0;
 
   await ensureDir(KB_TARGET);
